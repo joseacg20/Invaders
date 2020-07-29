@@ -32,6 +32,13 @@ var livingEnemies = [];
 var nnNetwork , nnEntrenamiento, nnSalida, datosEntrenamiento = [];
 var modoAuto = false, eCompleto = false;
 
+var velocidadBala;
+var despBala;
+var estatusAire;
+var estatuSuelo;
+
+var bullets;
+
 function create() {
     game.physics.startSystem(Phaser.Physics.ARCADE);
 
@@ -108,7 +115,7 @@ function create() {
     // fireButton = game.physics.arcade.overlap(bullets);
 
     // Creacion del Perceptron
-    nnNetwork =  new synaptic.Architect.Perceptron(2, 6, 6, 2);
+    nnNetwork =  new synaptic.Architect.Perceptron(3, 6, 6, 2);
     nnEntrenamiento = new synaptic.Trainer(nnNetwork);
 }
 
@@ -173,13 +180,23 @@ function resetVariables() {
 
     // Regresar disparo a la posicion inicial del heroe
     bullets.removeAll();
+    bullets.enableBody = true;
+    bullets.physicsBodyType = Phaser.Physics.ARCADE;
     bullets.createMultiple(1, 'bullet');
-    fireBullet();
+    bullets.setAll('anchor.x', 0.5);
+    bullets.setAll('anchor.y', 1);
+    bullets.setAll('outOfBoundsKill', true);
+    bullets.setAll('checkWorldBounds', true);
 
     // Regresar disparo a la posicion ramdom del enemigo
     enemyBullets.removeAll();
+    enemyBullets.enableBody = true;
+    enemyBullets.physicsBodyType = Phaser.Physics.ARCADE;
     enemyBullets.createMultiple(1, 'enemyBullet');
-    enemyFires();
+    enemyBullets.setAll('anchor.x', 0.5);
+    enemyBullets.setAll('anchor.y', 1);
+    enemyBullets.setAll('outOfBoundsKill', true);
+    enemyBullets.setAll('checkWorldBounds', true);
 
     // Remover todas la naves enemigas y regresarla a la posicion inicial
     aliens.removeAll();
@@ -242,21 +259,27 @@ function update() {
         if (game.time.now > firingTimer) {
             enemyFires();
         }
-        
         //  Ejecutar colisión
         game.physics.arcade.overlap(bullets, aliens, collisionHandler, null, this);
         game.physics.arcade.overlap(enemyBullets, player, enemyHitsPlayer, null, this);
     }
 
+    velocidadBala = Math.floor(enemyBullet.body.velocity.y);
+
+    despBalaX = Math.floor( player.position.x - enemyBullet.position.x );
+    despBalaY = Math.floor( player.position.y - enemyBullet.position.y );
+
+    estatuSuelo = Math.floor( player.position.x);
+
     // Se añadio para saber si esta en modo de juego o de entreaniento
-    if( modoAuto == false  && enemyBullets.position.x > 0 ) {
+    if( modoAuto == false )  { //&& enemyBullet.position.y > 0
         datosEntrenamiento.push({
-            'input' :  [despBala , velocidadBala],
-            'output':  [estatusAire , estatuSuelo ]  
+            'input' :  [despBalaX, despBalaY , velocidadBala],
+            'output':  [estatuSuelo ]  
         });
 
-        console.log("Desplazamiento Bala, Velocidad Bala, Estatus, Estatus: ", 
-            despBala + " " + velocidadBala + " " + estatusAire + " " +  estatuSuelo);
+        console.log("Desplazamiento Bala X: " + despBalaX, " Desplazamiento Bala Y: " + despBalaY, 
+            "Velocidad Bala: " + velocidadBala, "Estatus Suelo: " + estatuSuelo);
    }
 }
 
