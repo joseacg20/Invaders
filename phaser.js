@@ -164,14 +164,24 @@ function mPausa(event){
     }
 }
 
-// Se añadio
+// Se añadio para restablecer las variables del player, alients,
 function resetVariables() {
-    player.body.x = 0;
-    player.body.y = 0;
-
-
+    // Regresar la nave del heroe a su posicion inicial
+    player.x = 400;
+    player.y = 500;
     player.revive();
 
+    // Regresar disparo a la posicion inicial del heroe
+    bullets.removeAll();
+    bullets.createMultiple(1, 'bullet');
+    fireBullet();
+
+    // Regresar disparo a la posicion ramdom del enemigo
+    enemyBullets.removeAll();
+    enemyBullets.createMultiple(1, 'enemyBullet');
+    enemyFires();
+
+    // Remover todas la naves enemigas y regresarla a la posicion inicial
     aliens.removeAll();
     createAliens();
 }
@@ -275,17 +285,17 @@ function collisionHandler (bullet, alien) {
         score += 1000;
         scoreText.text = scoreString + score;
 
-        enemyBullets.callAll('kill',this);
-        stateText.text = " You Won, \n Click to restart";
+        enemyBullets.callAll('kill', this);
+        stateText.text = " You Win, \n Click to restart";
         stateText.visible = true;
 
         // El controlador "haga clic para reiniciar"
-        game.input.onTap.addOnce(restart,this);
+        game.input.onTap.addOnce(restart, this);
     }
 
 }
 
-function enemyHitsPlayer (player,bullet) {
+function enemyHitsPlayer (player, bullet) {
     bullet.kill();
 
     live = lives.getFirstAlive();
