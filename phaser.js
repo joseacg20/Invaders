@@ -171,7 +171,7 @@ function mPausa(event){
     }
 }
 
-// Se añadio para restablecer las variables del player, alients,
+// Se añadio para restablecer las variables del player, alients, y balas
 function resetVariables() {
     // Regresar la nave del heroe a su posicion inicial
     player.x = 400;
@@ -263,16 +263,11 @@ function update() {
         game.physics.arcade.overlap(bullets, aliens, collisionHandler, null, this);
         game.physics.arcade.overlap(enemyBullets, player, enemyHitsPlayer, null, this);
     }
-
-    velocidadBala = Math.floor(enemyBullet.body.velocity.y);
-
-    despBalaX = Math.floor( player.position.x - enemyBullet.position.x );
-    despBalaY = Math.floor( player.position.y - enemyBullet.position.y );
-
-    estatuSuelo = Math.floor( player.position.x);
+    
+    estatuSuelo = Math.floor( player.position.x ); // Se añadio para obtener la poscion de la name del heroe
 
     // Se añadio para saber si esta en modo de juego o de entreaniento
-    if( modoAuto == false )  { //&& enemyBullet.position.y > 0
+    if( modoAuto == false && despBalaY > 0)  { //
         datosEntrenamiento.push({
             'input' :  [despBalaX, despBalaY , velocidadBala],
             'output':  [estatuSuelo ]  
@@ -364,9 +359,14 @@ function enemyFires () {
         var shooter = livingEnemies[random];
         // Y dispara la bala de este enemigo
         enemyBullet.reset(shooter.body.x, shooter.body.y);
-
+        
+        despBalaX = Math.floor( player.position.x - enemyBullet.position.x ); //Se añadio para saber la posicion de la bala enemiga
+        despBalaY = Math.floor( player.position.y - enemyBullet.position.y ); //Se añadio para saber la posicion de la bala enemiga
+        
         game.physics.arcade.moveToObject(enemyBullet, player, 120);
         firingTimer = game.time.now + 2000;
+        
+        velocidadBala = Math.floor(enemyBullet.body.velocity.y); //Se añadio para saber la velocidad de desplazameinto de la bala enemiga
     }
 }
 
