@@ -252,7 +252,7 @@ function update() {
         //  ¿Disparo?
         if (fireButton.isDown) {
             fireBullet();
-        } else {
+        } else if (livingEnemies.length > 0) { // Se añadio para disparar automaticamente
             fireBullet();
         }
 
@@ -266,6 +266,18 @@ function update() {
     
     estatuSuelo = Math.floor( player.position.x ); // Se añadio para obtener la poscion de la name del heroe
 
+    if( modoAuto == true  && despBalaY > 0 && player.body.onFloor()) {
+        if( datosDeEntrenamiento( [despBalaX , velocidadBala , despBalaY] ) [0] ){
+            saltar();
+        } 
+        
+        if ( datosDeEntrenamiento( [despBalaX , velocidadBala , despBalaY] ) [1] ){
+            down();
+            console.log(datosDeEntrenamiento( [despBalaX , velocidadBala , despBalaY] ));
+        }
+        console.log(datosDeEntrenamiento( [despBalaX , velocidadBala , despBalaY] ));
+   
+    }
     // Se añadio para saber si esta en modo de juego o de entreaniento
     if( modoAuto == false && despBalaY > 0)  { //
         datosEntrenamiento.push({
