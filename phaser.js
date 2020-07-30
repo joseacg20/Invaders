@@ -29,15 +29,9 @@ var stateText;
 var livingEnemies = [];
 
 // Se añadiron las siguiente variables
-var nnNetwork , nnEntrenamiento, nnSalida, datosEntrenamiento = [];
 var modoAuto = false, eCompleto = false;
-
-var velocidadBala;
-var despBala;
-var estatusAire;
-var estatuSuelo;
-
-var bullets;
+var nnNetwork , nnEntrenamiento, nnSalida, datosEntrenamiento = [];
+var despBala, estatuSuelo, velocidadBala, estatuSueloDer, estatuSueloIzq;
 
 function create() {
     game.physics.startSystem(Phaser.Physics.ARCADE);
@@ -121,16 +115,16 @@ function create() {
 
 // Se añdio para crear la red neuronal
 function enRedNeural(){
-    nnEntrenamiento.train(datosEntrenamiento, {rate: 0.0003, iterations: 10000, shuffle: true});
+    nnEntrenamiento.train(datosEntrenamiento, {rate: 0.0003, iterations: 15000, shuffle: true});
 }
 
 // Se añadio para crear el data set de entrenamiento
 function datosDeEntrenamiento(param_entrada){
-    console.log("Entrada", param_entrada[0] + " " + param_entrada[1]);
+    console.log("Entrada", param_entrada[0] + " " + param_entrada[1] + " " + param_entrada[2]);
     nnSalida = nnNetwork.activate(param_entrada);
-    var aire = Math.round( nnSalida[0] * 100 );
-    var piso = Math.round( nnSalida[1] * 100 );
-    console.log("Valor ", "En el Aire %: " + aire + " En el suelo %: " + piso );
+    var izquierda = Math.round( nnSalida[0] * 100 );
+    var derecha   = Math.round( nnSalida[1] * 100 );
+    console.log("Valor", "A la izquierda %: " + izquierda + " A la derecha %: " + derecha );
     return nnSalida[0] >= nnSalida[1];
 }
 
@@ -157,13 +151,12 @@ function mPausa(event){
                 modoAuto = false;
             } else if (mouse_x >= menu_x1 && mouse_x <= menu_x2 && mouse_y >= menu_y1 + 90 && mouse_y <= menu_y2) {
                 if (!eCompleto) {
-                    console.log("", "Entrenamiento " + datosEntrenamiento.length + " valores" );
+                    console.log("Entrenamiento " + datosEntrenamiento.length + " valores" );
                     enRedNeural();
                     eCompleto = true;
                 }
                 modoAuto = true;
             }
-
             menu.destroy();
             resetVariables();
             game.paused = false;
@@ -234,6 +227,16 @@ function descend() {
     aliens.y += 10;
 }
 
+// Se añadio a una funcion la velocidad de movimiento derecho para practicidad al hacer esa funcion
+function right () {
+    player.body.velocity.x = 200
+}
+
+// Se añadio a una funcion la velocidad de movimiento izquierda para practicidad al hacer esa funcion
+function left () {
+    player.body.velocity.x = -200;
+}
+
 function update() {
     //  Desplazarse por el fondo
     starfield.tilePosition.y += 2;
@@ -243,10 +246,10 @@ function update() {
         player.body.velocity.setTo(0, 0);
 
         if (cursors.left.isDown) {
-            player.body.velocity.x = -200;
+            left();
         }
         else if (cursors.right.isDown) {
-            player.body.velocity.x = 200;
+            right();
         }
 
         //  ¿Disparo?
@@ -263,30 +266,49 @@ function update() {
         game.physics.arcade.overlap(bullets, aliens, collisionHandler, null, this);
         game.physics.arcade.overlap(enemyBullets, player, enemyHitsPlayer, null, this);
     }
-    
-    estatuSuelo = Math.floor( player.position.x ); // Se añadio para obtener la poscion de la name del heroe
 
-    if( modoAuto == true  && despBalaY > 0 && player.body.onFloor()) {
-        if( datosDeEntrenamiento( [despBalaX , velocidadBala , despBalaY] ) [0] ){
-            saltar();
-        } 
-        
-        if ( datosDeEntrenamiento( [despBalaX , velocidadBala , despBalaY] ) [1] ){
-            down();
-            console.log(datosDeEntrenamiento( [despBalaX , velocidadBala , despBalaY] ));
+    estatuSueloIzq = 0;
+    estatuSueloDer = 0;
+    
+    if(!Phaser.Point.equals(player.body.velocity, new Phaser.Point(0,0) )) {
+        if(player.body.velocity.x < 0) {
+            estatuSueloIzq = 1;
+            estatuSueloDer = 0
+        } else {
+            estatuSueloIzq = 0;
+            estatuSueloDer = 1
         }
-        console.log(datosDeEntrenamiento( [despBalaX , velocidadBala , despBalaY] ));
-   
     }
+
+    // Se añadio para obtener la posicion de la nave del heroe
+    estatuSuelo = Math.floor( player.position.x ); 
+
+    // Se añadio para tomar la decision de desplazarse a la izquierda o derecha
+    if( modoAuto == true && despBalaY > 0 && player.body.deltaAbsX() == 0 ) {
+        if( datosDeEntrenamiento( [despBalaX, despBalaY, velocidadBala] ) > 0){
+            left();
+        } else {
+            right();
+        }
+    }
+    
     // Se añadio para saber si esta en modo de juego o de entreaniento
-    if( modoAuto == false && despBalaY > 0)  { //
+    if( modoAuto == false && despBalaY > 0 )  { //
         datosEntrenamiento.push({
-            'input' :  [despBalaX, despBalaY , velocidadBala],
-            'output':  [estatuSuelo ]  
+            'input' :  [despBalaX, despBalaY, velocidadBala],
+            'output':  [estatuSueloIzq, estatuSueloDer]  
         });
 
         console.log("Desplazamiento Bala X: " + despBalaX, " Desplazamiento Bala Y: " + despBalaY, 
-            "Velocidad Bala: " + velocidadBala, "Estatus Suelo: " + estatuSuelo);
+                    "Velocidad Bala: " + velocidadBala, "Estatus Suelo Izq: " + estatuSueloIzq, 
+                    "Estatus Suelo Der: " + estatuSueloDer);
+   }
+
+   // Si ya no existen enemigos regresa a la posicion inicial
+   if ( livingEnemies.length == 0 ) {
+        player.x = 400;
+        player.y = 500;
+        modoAuto == false;
    }
 }
 
@@ -372,14 +394,24 @@ function enemyFires () {
         // Y dispara la bala de este enemigo
         enemyBullet.reset(shooter.body.x, shooter.body.y);
         
-        despBalaX = Math.floor( player.position.x - enemyBullet.position.x ); //Se añadio para saber la posicion de la bala enemiga
-        despBalaY = Math.floor( player.position.y - enemyBullet.position.y ); //Se añadio para saber la posicion de la bala enemiga
+        //Se añadio para saber la posicion de la bala enemiga en eje X y Y
+        despBalaX = Math.floor( player.position.x - enemyBullet.position.x ); 
+        despBalaY = Math.floor( player.position.y - enemyBullet.position.y ); 
         
-        game.physics.arcade.moveToObject(enemyBullet, player, 120);
+        // Se añadio para asignnar un valor aleario
+        velocidadBalaRandom = velocidadRandom(200, 600);
+
+        game.physics.arcade.moveToObject(enemyBullet, player, velocidadBalaRandom);
         firingTimer = game.time.now + 2000;
         
-        velocidadBala = Math.floor(enemyBullet.body.velocity.y); //Se añadio para saber la velocidad de desplazameinto de la bala enemiga
+        //Se añadio para saber la velocidad de desplazameinto de la bala enemiga
+        velocidadBala = Math.floor(enemyBullet.body.velocity.y); 
     }
+}
+
+// Se añadio para generar una velocidad aleatoria del disparo enemigo
+function velocidadRandom(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
 function fireBullet () {
