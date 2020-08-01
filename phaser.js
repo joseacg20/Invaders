@@ -6,7 +6,7 @@ function preload() {
     game.load.spritesheet('invader', 'assets/games/invaders/invader32x32x4.png', 32, 32);
     game.load.image('ship', 'assets/games/invaders/player.png');
     game.load.spritesheet('kaboom', 'assets/games/invaders/explode.png', 128, 128);
-    game.load.image('starfield', 'assets/games/invaders/starfield.png');
+    game.load.image('starfield', 'assets/games/invaders/starfield3.png');
     game.load.image('background', 'assets/games/starstruck/background2.png');
     game.load.image('menu', 'assets/games/invaders/menu.png'); //Se añadio la imagen para visualizar el menu
 }
@@ -87,7 +87,7 @@ function create() {
     game.add.text(game.world.width - 100, 10, 'Lives : ', { font: '34px Arial', fill: '#fff' });
     
     //  Texto
-    stateText = game.add.text(game.world.centerX,game.world.centerY,' ', { font: '84px Arial', fill: '#fff' });
+    stateText = game.add.text(game.world.centerX, 435,' ', { font: '24px Arial', fill: '#fff' });
     stateText.anchor.setTo(0.5, 0.5);
     stateText.visible = false;
 
@@ -338,11 +338,13 @@ function collisionHandler (bullet, alien) {
         scoreText.text = scoreString + score;
 
         enemyBullets.callAll('kill', this);
-        stateText.text = " You Win, \n Click to restart";
+        stateText.text = " You Win";
         stateText.visible = true;
 
         // El controlador "haga clic para reiniciar"
         game.input.onTap.addOnce(restart, this);
+
+        pausa();
     }
 
 }
@@ -366,11 +368,13 @@ function enemyHitsPlayer (player, bullet) {
         player.kill();
         enemyBullets.callAll('kill');
 
-        stateText.text=" GAME OVER \n Click to restart";
+        stateText.text=" GAME OVER";
         stateText.visible = true;
 
         // El controlador "haga clic para reiniciar"
         game.input.onTap.addOnce(restart,this);
+
+        pausa();
     }
 }
 
