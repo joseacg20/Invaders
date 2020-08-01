@@ -43,7 +43,7 @@ function create() {
     bullets = game.add.group();
     bullets.enableBody = true;
     bullets.physicsBodyType = Phaser.Physics.ARCADE;
-    bullets.createMultiple(1, 'bullet'); //Modificacion para que el heroe dispare una bala cada 0.5 segundos
+    bullets.createMultiple(2, 'bullet'); //Modificacion para que el heroe dispare una bala cada 0.5 segundos
     bullets.setAll('anchor.x', 0.5);
     bullets.setAll('anchor.y', 1);
     bullets.setAll('outOfBoundsKill', true);
@@ -175,7 +175,7 @@ function resetVariables() {
     bullets.removeAll();
     bullets.enableBody = true;
     bullets.physicsBodyType = Phaser.Physics.ARCADE;
-    bullets.createMultiple(1, 'bullet');
+    bullets.createMultiple(2, 'bullet');
     bullets.setAll('anchor.x', 0.5);
     bullets.setAll('anchor.y', 1);
     bullets.setAll('outOfBoundsKill', true);
@@ -229,12 +229,12 @@ function descend() {
 
 // Se añadio a una funcion la velocidad de movimiento derecho para practicidad al hacer esa funcion
 function right () {
-    player.body.velocity.x = 200
+    player.body.velocity.x = 350
 }
 
 // Se añadio a una funcion la velocidad de movimiento izquierda para practicidad al hacer esa funcion
 function left () {
-    player.body.velocity.x = -200;
+    player.body.velocity.x = -350;
 }
 
 function update() {
@@ -338,8 +338,8 @@ function collisionHandler (bullet, alien) {
         scoreText.text = scoreString + score;
 
         enemyBullets.callAll('kill', this);
-        stateText.text = " You Win";
-        stateText.visible = true;
+        // stateText.text = " You Win";
+        // stateText.visible = true;
 
         // El controlador "haga clic para reiniciar"
         game.input.onTap.addOnce(restart, this);
@@ -368,8 +368,8 @@ function enemyHitsPlayer (player, bullet) {
         player.kill();
         enemyBullets.callAll('kill');
 
-        stateText.text=" GAME OVER";
-        stateText.visible = true;
+        // stateText.text=" GAME OVER";
+        // stateText.visible = true;
 
         // El controlador "haga clic para reiniciar"
         game.input.onTap.addOnce(restart,this);
@@ -403,10 +403,10 @@ function enemyFires () {
         despBalaY = Math.floor( player.position.y - enemyBullet.position.y ); 
         
         // Se añadio para asignnar un valor aleario
-        velocidadBalaRandom = velocidadRandom(200, 600);
+        velocidadBalaRandom = velocidadRandom(350, 600);
 
         game.physics.arcade.moveToObject(enemyBullet, player, velocidadBalaRandom);
-        firingTimer = game.time.now + 2000;
+        firingTimer = game.time.now + 1000;
         
         //Se añadio para saber la velocidad de desplazameinto de la bala enemiga
         velocidadBala = Math.floor(enemyBullet.body.velocity.y); 
